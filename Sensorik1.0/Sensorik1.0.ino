@@ -6,8 +6,8 @@
 #define OLED_RESET     4 // Reset pin # (or -1 if sharing Arduino reset pin)
 Adafruit_SSD1306 display(128, 64, &Wire, 4);
 
-#define anzSensoren 2
-byte pinSensor[anzSensoren]={11,12};
+#define anzSensoren 4
+byte pinSensor[anzSensoren]={11,12,9,10};
 
 bool pinStatus[anzSensoren];
 bool lastPinStatus[anzSensoren];
@@ -26,11 +26,9 @@ void setup() {
   display.drawLine(32, 31, 96, 31, SSD1306_WHITE);
   display.display();
   
-  pinMode(11, INPUT_PULLUP);
-  pinMode(12, INPUT_PULLUP);
-
   
   for (byte i=0; i<anzSensoren; i++){
+    pinMode(pinSensor[i], INPUT_PULLUP);
   pinStatus[i]=!digitalRead(pinSensor[i]);
   }
 }
@@ -42,37 +40,41 @@ void loop() {
   pinStatus[i]=!digitalRead(pinSensor[i]);
   }
   //------Ausgabe Sensoren--------
-  left(pinStatus[0]);
-  right(pinStatus[1]);
+  left(pinStatus[0]||pinStatus[2]);
+  right(pinStatus[1]||pinStatus[3]);
   display.display();
   
   /*
   Serial.print("last");
-  Serial.print(lastPinStatus[0]);
-  Serial.println(lastPinStatus[1]);
+  Serial.print(lastPinStatus[2]);
+  Serial.println(lastPinStatus[3]);
   Serial.print(" new");
-  Serial.print(pinStatus[0]);
-  Serial.println(pinStatus[1]);
+  Serial.print(pinStatus[2]);
+  Serial.println(pinStatus[3]);
   */
   //------Auswertung Sensoren------
-
-      if(pinStatus[0]!=lastPinStatus[0]||pinStatus[1]!=lastPinStatus[1]){
+  for(byte j=0; j<anzSensoren;j+=2){
+      if(pinStatus[j]!=lastPinStatus[j]||pinStatus[j+1]!=lastPinStatus[j+1]){
       //veränderung von alt zu neu 
-      if(pinStatus[0]!=lastPinStatus[0] & pinStatus[1]!=lastPinStatus[1]){ 
+      if(pinStatus[j]!=lastPinStatus[j] & pinStatus[j+1]!=lastPinStatus[j+1]){ 
         Serial.println("Error");
       }else{
         //nur einer der beiden Werte hat sich verändert
   
-        if(!lastPinStatus[0] & !lastPinStatus[1]){
+        if(!lastPinStatus[j] & !lastPinStatus[j+1]){
           Serial.print("Auto Fährt in den Sensor: ");
-          if(pinStatus[0]){
+          Serial.print((j/2));
+          Serial.print(" : ");
+          if(pinStatus[j]){
             Serial.println("links");
           }else{
             Serial.println("rechts");
           }
-        }else if(!pinStatus[0]&!pinStatus[1]){
+        }else if(!pinStatus[j]&!pinStatus[j+1]){
           Serial.print("Auto Fährt aus dem Sensor: ");
-          if(lastPinStatus[0]){
+          Serial.print((j/2));
+          Serial.print(" : ");
+          if(lastPinStatus[j]){
             Serial.println("links");
           }else{
             Serial.println("rechts");
@@ -85,6 +87,7 @@ void loop() {
       //Serial.println("absolut nix");
     }
   }
+}
 
 
 void left(boolean an){
