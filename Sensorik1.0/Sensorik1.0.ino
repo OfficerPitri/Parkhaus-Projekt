@@ -12,13 +12,14 @@ Adafruit_SSD1306 display(128, 64, &Wire, 4); //display anlegen
 //-----------Straßen-Schienen-Layout-Einstellungen-------------
 
 #define anzRichtungssensoren 2 
-const byte richtungsSensor [4] [anzRichtungssensoren]={ //rechtungssensoren werden als zwei reedSensoren mit anliegenden Straßen angelegt
-  {11, 12, 00, 01}, //pro zeile ein Richtungssensor mit anliegenden Straßen
-  {09, 10, 01, 02}, //Schreibweise: {pinReedsensor0, pinReedsensor1, StraßeId0, StraßeId1}      
-                    //pinReedsensor0/1 sind die pins an denen die Reedkontakte anliegen
+const byte richtungsSensor[anzRichtungssensoren][4]=
+{                   //rechtungssensoren werden als zwei reedSensoren mit anliegenden Straßen angelegt
+  {11, 12,  0,  1}, //pro zeile ein Richtungssensor mit anliegenden Straßen
+  { 9, 10,  1,  2}  //Schreibweise: {pinReedsensor0, pinReedsensor1, StraßeId0, StraßeId1}      
+};                  //pinReedsensor0/1 sind die pins an denen die Reedkontakte anliegen
                     //StraßeId0/1 sind Ids von Straßen, die Später beim Speichern von Autopositionen entscheident werden
                     //StraßeId0 fürt in Reedkontakt0 führt in Reedkontakt1 führt in StraßeId1  
-}//Beispielarray: StraßeId00 -- <RichtungsSensor0> -- StraßeId01 -- <RichtungsSensor1> -- StraßeId02
+                    //Beispielarray: StraßeId00 -- <RichtungsSensor0> -- StraßeId01 -- <RichtungsSensor1> -- StraßeId02
 
 //aussagen über positionswechsel von Autos können getroffen werden
 //an einem Straßenabschnitt können mehrere Sensoren mit verknüpften Straßen hängen, Jeder Sensor hat AUSSCHLIEßLICH 2 anliegende Straßen
@@ -46,21 +47,21 @@ void setup() {
   
   //einmaliges auslesen aller Zeilen um die Funktionsweise des Folgenden Codes zu garantieren
   //Anfangszustände, bei denen Autos auf der Strecke sind stellen ein Problem dar (nicht track bar)
-  for (byte i=0; i<anzRichtungssensoren*2; i+=2){
-    pinMode(richtungsSensor[0][i], INPUT_PULLUP);
-  pinStatus[i]=!digitalRead(richtungsSensor[0][i]); //werte werden zur besseren verarbeitbarkeit in ein array gespeichert
-  pinMode(richtungsSensor[1][i], INPUT_PULLUP);     //(so können sich die zustände während einem Durchlauf nicht veränden)
-  pinStatus[i+1]=!digitalRead(richtungsSensor[1][i]); 
+  for (byte i=0; i<anzRichtungssensoren; i+=2){
+    pinMode(richtungsSensor[i][0], INPUT_PULLUP);
+  pinStatus[i]=!digitalRead(richtungsSensor[i][0]); //werte werden zur besseren verarbeitbarkeit in ein array gespeichert
+  pinMode(richtungsSensor[i][1], INPUT_PULLUP);     //(so können sich die zustände während einem Durchlauf nicht veränden)
+  pinStatus[i+1]=!digitalRead(richtungsSensor[i][0]); 
   }                                        
 }//ende Setup
 
 void loop() {//main Programm
   //------Auslesen Sensoren-------
-  for (byte i=0; i<anzRichtungssensoren*2; i+=2){
+  for (byte i=0; i<anzRichtungssensoren; i+=2){
   lastPinStatus[i]=pinStatus[i];
-  pinStatus[i]=!digitalRead(richtungsSensor[0][i]);
+  pinStatus[i]=!digitalRead(richtungsSensor[i][0]);
   lastPinStatus[i+1]=pinStatus[i+1];
-  pinStatus[i+1]=!digitalRead(richtungsSensor[1][0]);
+  pinStatus[i+1]=!digitalRead(richtungsSensor[i][1]);
   }
   
   //------Auswertung Sensoren------
@@ -73,10 +74,11 @@ void loop() {//main Programm
   //(Sensoren werden so verbaut dass an beiden pins gleichzeitig ein Signal anliegen kann)
   
   for(byte j=0; j<anzRichtungssensoren*2;j+=2){
+    
       if(pinStatus[j]!=lastPinStatus[j]||pinStatus[j+1]!=lastPinStatus[j+1]){
       //veränderung von alt zu neu 
       if(pinStatus[j]!=lastPinStatus[j] & pinStatus[j+1]!=lastPinStatus[j+1]){ 
-        Serial.println("Error");
+        Serial.println("!!!!!!!!!!!!!!!!!!!!!!!!Error!!!!!!!!!!!!!!!!!!!!!!!!!!!");
       }else{
         //nur einer der beiden Werte hat sich verändert
   
