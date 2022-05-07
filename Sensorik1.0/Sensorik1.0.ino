@@ -11,11 +11,22 @@ Adafruit_SSD1306 display(128, 64, &Wire, 4); //display anlegen
 
 //-----------Straßen-Schienen-Layout-Einstellungen-------------
 
-#define anzRichtungssensoren 2 
+#define anzRichtungssensoren 13 
 const byte richtungsSensor[anzRichtungssensoren][4]=
 {                   //rechtungssensoren werden als zwei reedSensoren mit anliegenden Straßen angelegt
   {11, 12,  0,  1}, //pro zeile ein Richtungssensor mit anliegenden Straßen
-  { 9, 10,  1,  2}  //Schreibweise: {pinReedsensor0, pinReedsensor1, StraßeId0, StraßeId1}      
+  { 9, 10,  1,  2},
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, 
+  { 9, 10,  1,  2}, //Schreibweise: {pinReedsensor0, pinReedsensor1, StraßeId0, StraßeId1}      
 };                  //pinReedsensor0/1 sind die pins an denen die Reedkontakte anliegen
                     //StraßeId0/1 sind Ids von Straßen, die Später beim Speichern von Autopositionen entscheident werden
                     //StraßeId0 fürt in Reedkontakt0 führt in Reedkontakt1 führt in StraßeId1  
@@ -78,7 +89,14 @@ void loop() {//main Programm
       if(pinStatus[j]!=lastPinStatus[j]||pinStatus[j+1]!=lastPinStatus[j+1]){
       //veränderung von alt zu neu 
       if(pinStatus[j]!=lastPinStatus[j] & pinStatus[j+1]!=lastPinStatus[j+1]){ 
-        Serial.println("!!!!!!!!!!!!!!!!!!!!!!!!Error!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        Serial.print("!!!!!!!!!!!!!!!!!!!!!!!!Error at Sensor:");
+        Serial.println(j/2);
+        Serial.print("pre: ");
+        Serial.print(pinStatus[j]);
+        Serial.println(pinStatus[j+1]);
+        Serial.print("now: ");
+        Serial.print(lastPinStatus[j]);
+        Serial.println(lastPinStatus[j+1]);
       }else{
         //nur einer der beiden Werte hat sich verändert
   
